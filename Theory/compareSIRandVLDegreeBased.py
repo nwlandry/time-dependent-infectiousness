@@ -8,28 +8,28 @@ from matplotlib import cm
 from numpy.linalg import inv
 from utilities import *
 
+nInfectiousStates = 8
+lengthOfInfectiousness = 7
+nStates = nInfectiousStates + 2
+threshold = 0.2
+maxRate = 1
+timeToMaxRate = 4
 
-
-nInfectiousStates = 20
-tStates = np.linspace(0, 20, nInfectiousStates)
+tStates = np.linspace(0.0, lengthOfInfectiousness, nInfectiousStates)
 dt = tStates[1] - tStates[0]
-nStates = len(tStates) + 2
 
-b = betaVL(tStates, 0.0, 0.2)
+b = betaVL(tStates, threshold, maxRate, timeToMaxRate)
 bConst = betaConstant(tStates, np.mean(b))
-beta = np.sum(b)/dt
+beta = np.sum(b)
 gamma = 1/dt
 
-tmax = 100
-
-degrees = np.arange(1, 6, 1)
-k = len(degrees)
-meanDegree = 2
-p = 0.1*np.ones(5)
-
-P = generateConfigurationModelP(degrees, meanDegree, p)
-
+tmax = 30
 initialFractionInfected = 0.01
+
+degrees = np.random.randint(1, 11, size=100)
+P = generateConfigurationModelP(degrees)
+k = len(P)
+
 initialStatesVL = np.zeros(nStates*k)
 initialInfected = np.random.rand(k)
 initialStatesVL[k:2*k] = initialFractionInfected*initialInfected/np.sum(initialInfected)
@@ -39,7 +39,6 @@ initialStatesVL[:k] = (1 - initialFractionInfected)*initialSusceptible/np.sum(in
 initialStatesSIR = np.zeros(3*k)
 initialStatesSIR[k:2*k] = initialFractionInfected*initialInfected/np.sum(initialInfected)
 initialStatesSIR[:k] = (1 - initialFractionInfected)*initialSusceptible/np.sum(initialSusceptible)
-
 
 sol1 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(P, b, dt))
 t1 = sol1.t

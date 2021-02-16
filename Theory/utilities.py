@@ -4,12 +4,10 @@ import math
 from scipy.integrate import solve_ivp
 from numpy.linalg import inv
 
-
-def betaVL(t, threshold, maxP):
-    timeToPeak = 4
-    p = math.e/timeToPeak*np.multiply(t, np.exp(-t/timeToPeak))
-    p[np.where(p < threshold)] = 0
-    return maxP*p
+def betaVL(t, threshold, maxRate, timeToMaxRate):
+    rate = math.e/timeToMaxRate*np.multiply(t, np.exp(-t/timeToMaxRate))
+    rate[np.where(rate < threshold)] = 0
+    return maxRate*rate
 
 def betaConstant(t, p):
     return p*np.ones(np.size(t,axis=0))
@@ -38,7 +36,10 @@ def viralLoadModelDegreeBased(t, X, P, beta, dt):
         dXdt[k:2*k] += np.multiply(S, beta[index]*P.dot(I[k*index:k*(index+1)]))
     return dXdt
 
-def generateConfigurationModelP(k, meanDegree, p):
+def generateConfigurationModelP(degreeSequence):
+    k, counts = np.unique(degreeSequence, return_counts=True) # get unique k values
+    p = counts/len(degreeSequence)
+    meanDegree = np.mean(degreeSequence)
     return np.outer(k,np.multiply(k, p))/meanDegree
 
 def SIRModelFullyMixed(t, X, beta, gamma):
@@ -94,3 +95,14 @@ def calculateCriticalMax(nInfectiousStates, tStates, threshold, dt, tolerance=0.
             pMax = pNew
         iterations += 1
     return pMin
+
+
+def generatePowerLawDegreeSequence(n, minDegree, maxDegree, exponent):
+    return np.round(invCDFPowerLaw(np.random.rand(n), minDegree, maxDegree, exponent))
+    # for i in range(n):
+    #     u = random.uniform(0, 1)
+    #     degreeSequence[i] = round(self.invCDFPowerLaw(u, minDegree, maxDegree, exponent))
+    # return degreeSequence
+
+def invCDFPowerLaw(u, minDegree, maxDegree, exponent):
+    return (minDegree**(1-exponent) + u*(maxDegree**(1-exponent) - minDegree**(1-exponent)))**(1/(1-exponent))

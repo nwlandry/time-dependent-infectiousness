@@ -10,25 +10,30 @@ from utilities import *
 
 
 
-nInfectiousStates = 10
-tStates = np.linspace(0, 20, nInfectiousStates)
-dt = tStates[1] - tStates[0]
-nStates = len(tStates)+2
+nInfectiousStates = 8
+lengthOfInfectiousness = 7
+nStates = nInfectiousStates + 2
+threshold = 0.2
+maxRate = 1
+timeToMaxRate = 4
 
-b = betaVL(tStates, 0.0, 0.1)
+tStates = np.linspace(0.0, lengthOfInfectiousness, nInfectiousStates)
+dt = tStates[1] - tStates[0]
+
+b = betaVL(tStates, threshold, maxRate, timeToMaxRate)
 bConst = betaConstant(tStates, np.mean(b))
-beta = np.sum(b)*dt
+beta = np.sum(b)
 gamma = 1/dt
 
-N = 1000
-tmax = 200
+tmax = 40
+initialFractionInfected = 0.01
 
-numInfected = 1
+### Fully mixed
 initialStatesVL = np.zeros(nStates)
-initialStatesVL[1] = numInfected/N
-initialStatesVL[0] = 1 - numInfected/N
+initialStatesVL[1] = initialFractionInfected
+initialStatesVL[0] = 1 - initialFractionInfected
 
-initialStatesSIR = [(N-numInfected)/N, numInfected/N, 0]
+initialStatesSIR = [1 - initialFractionInfected, initialFractionInfected, 0]
 
 sol1 = solve_ivp(viralLoadModelFullyMixed, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(b, dt))
 t1 = sol1.t
