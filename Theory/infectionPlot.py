@@ -8,8 +8,8 @@ from matplotlib import cm
 from numpy.linalg import inv
 from utilities import *
 
-nInfectiousStates = 8
-lengthOfInfectiousness = 7
+nInfectiousStates = 100
+lengthOfInfectiousness = 21
 nStates = nInfectiousStates + 2
 threshold = 0.2
 maxRate = 1
@@ -26,10 +26,10 @@ b = betaVL(tStates, threshold, maxRate, timeToMaxRate)
 bScaled = b/(np.sum(b)*dt)
 b = b0*bScaled
 bConst = betaConstant(tStates, np.mean(b))
-beta = np.sum(b)
-gamma = 1/dt
+beta = np.mean(b)
+gamma = 1/lengthOfInfectiousness
 
-tmax = 40
+tmax = 100
 initialFractionInfected = 0.01
 
 ### Fully mixed
@@ -51,12 +51,14 @@ sol3 = solve_ivp(SIRModelFullyMixed, (0, tmax), initialStatesSIR, t_eval=np.aran
 t3 = sol3.t
 y3 = sol3.y.T
 
+reds = cm.get_cmap("Reds")
+blues = cm.get_cmap("Blues")
+greens = cm.get_cmap("Greens")
+
 plt.figure(figsize=(8,6))
-plt.subplot(311)
-plt.title("Fully mixed", fontsize=16)
-plt.plot(t1, np.sum(y1[:,1:-1], axis=1), label=r"$\beta(t)\propto\frac{e}{4} t e^{-t/4}$, (VL Model)", linewidth=2)
-plt.plot(t2, np.sum(y2[:,1:-1], axis=1), label=r"$\beta(t)=c$, (VL Model)", linewidth=2)
-plt.plot(t3, y3[:,-2], label="SIR Model", linewidth=2)
+plt.plot(t1, np.sum(y1[:,1:-1], axis=1), linewidth=2, color=reds(0.4))
+plt.plot(t2, np.sum(y2[:,1:-1], axis=1), color=greens(0.4))
+plt.plot(t3, y3[:,-2], linewidth=2, color=blues(0.4))
 plt.ylim([0, 1])
 
 # Uniform degree distribution
@@ -68,8 +70,8 @@ spectralRadius = np.max(np.abs(np.linalg.eigvals(P)))
 bScaled = b/(spectralRadius*np.sum(b)*dt)
 b = k*b0*bScaled
 bConst = betaConstant(tStates, np.mean(b))
-beta = np.sum(b)
-gamma = 1/dt
+beta = np.mean(b)
+gamma = 1/lengthOfInfectiousness
 
 initialStatesVL = np.zeros(nStates*k)
 initialInfected = np.random.rand(k)
@@ -93,11 +95,9 @@ sol3 = solve_ivp(SIRModelDegreeBased, (0, tmax), initialStatesSIR, t_eval=np.ara
 t3 = sol3.t
 y3 = sol3.y.T
 
-plt.subplot(312)
-plt.title("Uniform degree distribution", fontsize=16)
-plt.plot(t1, np.sum(y1[:,k:-k], axis=1), label=r"$\beta(t)\propto\frac{e}{4} t e^{-t/4}$, (VL Model)", linewidth=2)
-plt.plot(t2, np.sum(y2[:,k:-k], axis=1), label=r"$\beta(t)=c$, (VL Model)", linewidth=2)
-plt.plot(t3, np.sum(y3[:,k:2*k], axis=1), label="SIR Model", linewidth=2)
+plt.plot(t1, np.sum(y1[:,k:-k], axis=1), label=r"$\beta(t)\propto t e^{-t/4}$, (VL Model)", linewidth=2, color=reds(0.6))
+plt.plot(t2, np.sum(y2[:,k:-k], axis=1), label=r"$\beta(t)=c$, (VL Model)", linewidth=2, color=greens(0.6))
+plt.plot(t3, np.sum(y3[:,k:2*k], axis=1), label="SIR Model", linewidth=2, color=blues(0.6))
 plt.ylabel("Total fraction infected", fontsize=16)
 plt.ylim([0, 1])
 
@@ -110,8 +110,8 @@ spectralRadius = np.max(np.abs(np.linalg.eigvals(P)))
 bScaled = b/(spectralRadius*np.sum(b)*dt)
 b = k*b0*bScaled
 bConst = betaConstant(tStates, np.mean(b))
-beta = np.sum(b)
-gamma = 1/dt
+beta = np.mean(b)
+gamma = 1/lengthOfInfectiousness
 
 initialStatesVL = np.zeros(nStates*k)
 initialInfected = np.random.rand(k)
@@ -135,14 +135,14 @@ sol3 = solve_ivp(SIRModelDegreeBased, (0, tmax), initialStatesSIR, t_eval=np.ara
 t3 = sol3.t
 y3 = sol3.y.T
 
-plt.subplot(313)
-plt.title("Power-law degree distribution", fontsize=16)
-plt.plot(t1, np.sum(y1[:,k:-k], axis=1), label=r"$\beta(t)\propto\frac{e}{4} t e^{-t/4}$, (VL Model)", linewidth=2)
-plt.plot(t2, np.sum(y2[:,k:-k], axis=1), label=r"$\beta(t)=c$, (VL Model)", linewidth=2)
-plt.plot(t3, np.sum(y3[:,k:2*k], axis=1), label="SIR Model", linewidth=2)
+plt.plot(t1, np.sum(y1[:,k:-k], axis=1), linewidth=2, color=reds(0.8))
+plt.plot(t2, np.sum(y2[:,k:-k], axis=1), linewidth=2, color=greens(0.8))
+plt.plot(t3, np.sum(y3[:,k:2*k], axis=1), linewidth=2, color=blues(0.8))
 plt.xlabel("time (days)", fontsize=16)
 plt.ylim([0, 1])
+plt.text(1, 0.8, "Light: Fully-mixed\nMedium: Uniform degree distribution\nDark: Power-law degree distribution", fontsize=12)
 plt.legend(loc="upper right")
 plt.tight_layout()
 plt.savefig("infection_curves.png", dpi=600)
+plt.savefig("infection_curves.pdf")
 plt.show()

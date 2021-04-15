@@ -9,8 +9,8 @@ def betaVL(t, threshold, maxRate, timeToMaxRate):
     rate[np.where(rate < threshold)] = 0
     return maxRate*rate
 
-def betaConstant(t, p):
-    return p*np.ones(np.size(t,axis=0))
+def betaConstant(t, rate):
+    return rate*np.ones(len(t))
 
 def viralLoadModelFullyMixed(t, X, beta, dt):
     S = X[0]
@@ -40,7 +40,7 @@ def generateConfigurationModelP(degreeSequence):
     k, counts = np.unique(degreeSequence, return_counts=True) # get unique k values
     p = counts/len(degreeSequence)
     meanDegree = np.mean(degreeSequence)
-    return np.outer(k,np.multiply(k, p))/meanDegree
+    return np.outer(k,np.multiply(k, p))/(meanDegree*len(degreeSequence))
 
 def SIRModelFullyMixed(t, X, beta, gamma):
     S = X[0]

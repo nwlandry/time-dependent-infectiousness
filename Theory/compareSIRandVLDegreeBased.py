@@ -8,11 +8,11 @@ from matplotlib import cm
 from numpy.linalg import inv
 from utilities import *
 
-nInfectiousStates = 8
-lengthOfInfectiousness = 7
+nInfectiousStates = 15
+lengthOfInfectiousness = 14
 nStates = nInfectiousStates + 2
-threshold = 0.2
-maxRate = 1
+threshold = 0.0
+maxRate = 100
 timeToMaxRate = 4
 
 tStates = np.linspace(0.0, lengthOfInfectiousness, nInfectiousStates)
@@ -20,13 +20,13 @@ dt = tStates[1] - tStates[0]
 
 b = betaVL(tStates, threshold, maxRate, timeToMaxRate)
 bConst = betaConstant(tStates, np.mean(b))
-beta = np.sum(b)
-gamma = 1/dt
-
-tmax = 30
+beta = np.mean(b)
+gamma = 1/lengthOfInfectiousness
+tmax = 50
 initialFractionInfected = 0.01
 
 degrees = np.random.randint(1, 11, size=100)
+degrees = generatePowerLawDegreeSequence(100, 3, 100, 3)
 P = generateConfigurationModelP(degrees)
 k = len(P)
 
@@ -54,10 +54,22 @@ y3 = sol3.y.T
 
 plt.figure()
 plt.plot(t1, np.sum(y1[:,k:-k], axis=1), label=r"$\beta(t)\propto\frac{e}{4} t e^{-t/4}$, (VL Model)")
-#plt.plot(t1, np.sum(y1[:,-k:], axis=1), label=r"$\beta(t)\propto\frac{e}{4} t e^{-t/4}$, (VL Model)")
 plt.plot(t2, np.sum(y2[:,k:-k], axis=1), label=r"$\beta(t)=c$, (VL Model)")
 plt.plot(t3, np.sum(y3[:,k:2*k], axis=1), label="SIR Model")
-plt.xlabel("time (days)")
-plt.ylabel("Fraction infected (summed over all stages)")
+plt.xlabel("time (days)", fontsize=14)
+plt.ylabel("Fraction infected (summed over all stages)", fontsize=14)
+plt.ylim([0, 1])
 plt.legend()
+plt.tight_layout()
+plt.show()
+
+plt.figure()
+plt.plot(t1, y1[:,k:-k].dot(repmat(b, 1, k).T), label=r"$\beta(t)\propto\frac{e}{4} t e^{-t/4}$, (VL Model)")
+plt.plot(t2, y2[:,k:-k].dot(repmat(bConst, 1, k).T), label=r"$\beta(t)=c$, (VL Model)")
+plt.plot(t3, beta*np.sum(y3[:,k:2*k], axis=1), label="SIR Model")
+plt.xlabel("time (days)", fontsize=14)
+plt.ylabel("Infection rate (summed over all stages)", fontsize=14)
+plt.ylim([0, 7])
+plt.legend()
+plt.tight_layout()
 plt.show()
