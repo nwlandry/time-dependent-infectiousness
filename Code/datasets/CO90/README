@@ -1,0 +1,125 @@
+Partial Project 90 Data
+
+Description: The Project 90 dataset consists of two tab-separated files, edges.tsv
+and nodes.tsv, that describe the structure of the Project 90 network and the
+individual-level attributes of study participants.
+
+For more on the Project 90 study please see: 
+* Potterat JJ, et al. (2004) "Network Dynamism: History and Lessons of
+the Colorado Springs Study" in Network Epidemiology: A Handbook for
+Survey Design and Data Collection, ed Morris M (Oxford University
+Press, Oxford), pp 87-114.
+* Woodhouse DE, et al. (1994) "Mapping a Social Network of
+Heterosexuals at High Risk for HIV Infection," AIDS 8:1331-1336.
+* Klovdahl AS, et al. (1994) "Social Networks and Infectious Disease:
+The Colorado Springs Study," Social Science and Medicine 38:79-88.
+* Rothenberg RB, et al. (1995) "Social Networks in Disease
+Transmission: the Colorado Springs Study" in Social Networks, Drug
+Abuse, and HIV Transmission, eds Needle RH, Coyle S, Genser SG,
+Trotter RT (National Institute on Drug Abuse) Vol. 151, pp 3-19.
+
+This data allows researchers to replicate some of the results in:
+* Sharad Goel and Matthew J. Salganik (2010) "Assessing Respondent-Driven 
+Sampling," Proceedings of the National Academy of Sciences of the United 
+States of America (PNAS) Vol. 107, pp:6743-6747.
+
+*** We thank Steve Muth and John Potterat for providing the data. ***
+
+-----------
+edges.tsv
+-----------
+Each row indicates an edge in the network, specified by a pair of node ids. Edges 
+represent social, sexual, and/or drug affiliation.  Each edge is recorded twice.  
+In other words, if there is an edge between 12 and 15, there is also an edge between 15 and 12.
+
+summary statistics
+-------------------
+Edges: 43,288
+
+-----------
+nodes.tsv
+-----------
+Each row corresponds to a study participant. In addition to node id, the following 
+attributes are listed for each individual:
+
+Race (1 = Native American; 2 = Black; 3 = Asian/Pacific Islander; 4 = White; 5 = Other)
+Gender (0 = Male; 1 = Female)
+Sex Worker (0 = No; 1 = Yes)
+Pimp (0 = No; 1 = Yes)
+Sex Work Client (0 = No; 1 = Yes)
+Drug Dealer (0 = No; 1 = Yes)
+Drug Cook (0 = No; 1 = Yes) 
+Thief (0 = No; 1 = Yes)
+Retired (0 = No; 1 = Yes) 
+Housewife (0 = No; 1 = Yes)
+Disabled (0 = No; 1 = Yes)
+Unemployed (0 = No; 1 = Yes)
+Homeless (0 = No; 1 = Yes)
+
+Missing values are denoted by 'NA'
+
+Summary statistics
+--------------------
+People: 5,492
+
+Race:
+Native American, Black, Asian/Pacific Islander, White, Other, <NA> 
+51, 1146, 59, 4168, 10, 58 
+
+Gender:
+  Male Female   <NA> 
+  3118   2374      0 
+
+Sex Worker:
+  No  Yes <NA> 
+4872  288  332
+ 
+Pimp:
+  No  Yes <NA> 
+5079   84  329 
+
+Sex Work Client:
+  No  Yes <NA> 
+4999  487    6 
+
+Drug Dealer:
+  No  Yes <NA> 
+4811  350  331
+
+Drug Cook:
+  No  Yes <NA> 
+5117   45  330
+ 
+Thief:
+  No  Yes <NA> 
+5041  121  330 
+
+Retired:
+  No  Yes <NA> 
+5002  160  330 
+
+Housewife:
+  No  Yes <NA> 
+4835  331  326 
+
+Disabled:
+  No  Yes <NA> 
+4936  226  330 
+
+Unemployed:
+  No  Yes <NA> 
+4272  891  329 
+
+Homeless:
+  No  Yes <NA> 
+5095   67  330 
+
+
+
+----------
+Notes 
+----------
+
+* The category "Drug Cook" was incorrectly labeled "Drug Boss" in Goel and Salganik (2010).
+
+* Drug cooks are people who manufacture drugs (e.g., methamphetamine and crack) as a main source of income.
