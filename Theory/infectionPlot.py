@@ -102,7 +102,7 @@ plt.ylabel("Total fraction infected", fontsize=16)
 plt.ylim([0, 1])
 
 ### Power Law degree distribution
-degrees = generatePowerLawDegreeSequence(n, 20, 100, 3)
+degrees = generatePowerLawDegreeSequence(n, 10, 100, 3)
 P = generateConfigurationModelP(degrees)
 k = len(P)
 
