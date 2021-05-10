@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import math
 from scipy.integrate import solve_ivp
 from numpy.linalg import inv
+from scipy.special import comb
 
 def betaVL(t, threshold, maxRate, timeToMaxRate):
     rate = math.e/timeToMaxRate*np.multiply(t, np.exp(-t/timeToMaxRate))
@@ -35,12 +36,6 @@ def viralLoadModelDegreeBased(t, X, P, beta, dt):
         dXdt[:k] += -np.multiply(S, beta[index]*P.dot(I[k*index:k*(index+1)]))
         dXdt[k:2*k] += np.multiply(S, beta[index]*P.dot(I[k*index:k*(index+1)]))
     return dXdt
-
-def generateConfigurationModelP(degreeSequence):
-    k, counts = np.unique(degreeSequence, return_counts=True) # get unique k values
-    p = counts/len(degreeSequence)
-    meanDegree = np.mean(degreeSequence)
-    return np.outer(k,np.multiply(k, p))/(meanDegree*len(degreeSequence))
 
 def SIRModelFullyMixed(t, X, beta, gamma):
     S = X[0]
@@ -99,10 +94,24 @@ def calculateCriticalMax(nInfectiousStates, tStates, threshold, dt, tolerance=0.
 
 def generatePowerLawDegreeSequence(n, minDegree, maxDegree, exponent):
     return np.round(invCDFPowerLaw(np.random.rand(n), minDegree, maxDegree, exponent))
-    # for i in range(n):
-    #     u = random.uniform(0, 1)
-    #     degreeSequence[i] = round(self.invCDFPowerLaw(u, minDegree, maxDegree, exponent))
-    # return degreeSequence
 
 def invCDFPowerLaw(u, minDegree, maxDegree, exponent):
     return (minDegree**(1-exponent) + u*(maxDegree**(1-exponent) - minDegree**(1-exponent)))**(1/(1-exponent))
+
+def generateConfigurationModelP(degreeSequence):
+    k, counts = np.unique(degreeSequence, return_counts=True) # get unique k values
+    p = counts/len(degreeSequence)
+    meanDegree = np.mean(degreeSequence)
+    return np.outer(k,np.multiply(k, p))/(meanDegree*len(degreeSequence))
+
+def binomialCCDF(n, p, threshold):
+    if n < threshold:
+        return 0
+    ccdf = 0
+    for value in range(threshold, n + 1):
+        ccdf += binomial(n, p, value)
+    return ccdf
+
+
+def binomial(n, p, value):
+    return comb(n, value, exact=True)*p**value*(1-p)**(n - value)

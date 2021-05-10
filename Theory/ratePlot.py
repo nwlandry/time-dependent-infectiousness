@@ -99,7 +99,7 @@ plt.plot(t2, y2[:,k:-k].dot(repmat(bConst, 1, k).T), label=r"$\beta(t)=c$, (VL M
 plt.plot(t3, beta*np.sum(y3[:,k:2*k], axis=1), label="SIR Model", linewidth=2, color=blues(0.6))
 
 ### Power Law degree distribution
-degrees = generatePowerLawDegreeSequence(n, 20, 100, 3)
+degrees = generatePowerLawDegreeSequence(n, 10, 100, 3)
 P = generateConfigurationModelP(degrees)
 k = len(P)
 
@@ -132,9 +132,9 @@ sol3 = solve_ivp(SIRModelDegreeBased, (0, tmax), initialStatesSIR, t_eval=np.ara
 t3 = sol3.t
 y3 = sol3.y.T
 
-plt.plot(t1, y1[:,k:-k].dot(repmat(b, 1, k).T), linewidth=2, color=reds(0.8))
-plt.plot(t2, y2[:,k:-k].dot(repmat(bConst, 1, k).T), linewidth=2, color=greens(0.8))
-plt.plot(t3, beta*np.sum(y3[:,k:2*k], axis=1), linewidth=2, color=blues(0.8))
+plt.plot(t1, y1[:,k:-k].dot(repmat(b, 1, k).T)/k, linewidth=2, color=reds(0.8))
+plt.plot(t2, y2[:,k:-k].dot(repmat(bConst, 1, k).T)/k, linewidth=2, color=greens(0.8))
+plt.plot(t3, beta*np.sum(y3[:,k:2*k], axis=1)/k, linewidth=2, color=blues(0.8))
 plt.xlabel("time (days)", fontsize=16)
 plt.ylabel("Total population infection rate", fontsize=16)
 

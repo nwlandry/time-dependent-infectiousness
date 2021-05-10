@@ -7,12 +7,12 @@ n = 100000
 nbins = 100
 dt = 0.1
 degreeDistribution = np.random.randint(low=50, high=150, size=(1000))
-degreeDistribution = utilities.generatePowerLawDegreeSequence(n, 45, 1000, 3)
+degreeDistribution = utilities.generatePowerLawDegreeSequence(n, 50, 1000, 3)
 beta = utilities.betaVL(np.linspace(0, 21, 100), 0, 1, 4)
 bAvg = np.mean(beta)
-meanDegree = np.mean(degreeDistribution)
+meanDegree = int(np.mean(degreeDistribution))
 
-plt.figure()
+plt.figure(figsize=(12,4))
 # fixed random
 secondaryInfections = np.zeros(n)
 for i in range(n):
@@ -21,6 +21,8 @@ for i in range(n):
     secondaryInfections[i] = np.random.binomial(k, b)
 plt.subplot(141)
 plt.hist(secondaryInfections, bins=nbins, density=True)
+plt.xlabel("Secondary infections")
+plt.ylabel("Probability")
 
 # contact random
 secondaryInfections = np.zeros(n)

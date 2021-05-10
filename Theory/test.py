@@ -8,20 +8,21 @@ from matplotlib import cm
 from numpy.linalg import inv
 import utilities
 
-N = 1000
-nStates = 10
-tStates = np.linspace(0, 20, nStates)
-T = np.zeros((nStates, nStates))
-S = np.diag(-np.ones(nStates), k=0) + np.diag(np.ones(nStates-1), k=-1)
-p = np.arange(0.0, 1, 0.01)
-T[0, :] += N*utilities.betaVL(tStates, 0.2, 1.0)
-print(T)
-print(inv(S))
-print(-np.matmul(T,inv(S)))
-l = np.linalg.eigvals(-np.matmul(T,inv(S)))
-print(np.max(np.abs(l)))
+N = 100000
 
+difference = np.arange(1, 1000, 10)
+spectralRadius = np.zeros(len(difference))
+numStates = np.zeros(len(difference))
+for i in range(len(difference)):
+    diff = difference[i]
+    degrees = np.random.randint(1000 - diff, 1000 + diff, size=N)
+    P = utilities.generateConfigurationModelP(degrees)
+    k = len(P)
+    numStates[i] = k
+    l = np.max(np.abs(np.linalg.eigvals(P)))
+    spectralRadius[i] = l
 
 plt.figure()
-plt.plot(p, spectralRadius)
+plt.semilogy(numStates, spectralRadius)
+plt.plot(numStates, np.divide(spectralRadius, numStates))
 plt.show()
