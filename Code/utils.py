@@ -4,7 +4,6 @@ import csv
 import math
 import os
 from scipy.sparse import csr_matrix
-import graph_tool as gt
 import networkx as nx
 import matplotlib.colors as mc
 import matplotlib.pyplot as plt
@@ -480,3 +479,63 @@ def get_neighbors(edge_list, node_list, node):
                 sus_neighbors.add(neighbor)
             neighbors.add(neighbor)
     return neighbors, sus_neighbors
+
+def getAvgDegree(node_list, edge_list):
+    avgDeg_ts = []
+
+    for t in edge_list.keys():
+        G = nx.Graph()
+        G.add_nodes_from(node_list)
+        G.add_edges_from(edge_list[t])
+        degrees = G.degree(node_list)
+        totalDeg = 0
+        for d_n_pair in degrees:
+            totalDeg = totalDeg + d_n_pair[1]
+        avgDeg_ts.append(totalDeg / len(node_list))
+    return np.sum(avgDeg_ts)/len(avgDeg_ts)
+
+def readInSFHH():
+    file_prefix = 'datasets/SFHH/'
+    nodes = set([])
+    edges = {}
+    time = [] # seconds, [t-20, t]
+    with open(file_prefix + 'tij_SFHH.dat_', 'r') as file:
+        Lines = file.readlines()
+
+        # Strips the newline character
+        for line in Lines:
+            time, i, j = line.replace(' ',',').strip().split(',')
+            print(time, i, j)
+            nodes.add(i)
+            nodes.add(j)
+
+            if time in edges.keys():
+                edges[time].append((i,j))
+            else:
+                edges[time] = [(i,j)]
+
+    return nodes, edges
+
+def readInCO90():
+    file_prefix = 'datasets/CO90/'
+    nodes = set([])
+    edges = []
+
+    with open(file_prefix + 'nodes.tsv', 'r') as file:
+        Lines = file.readlines()
+
+        # Strips the newline character
+        for line in Lines:
+            if "id" not in line:
+                i = line.replace('\t',',').strip().split(',')[0]
+                nodes.add(i)
+
+    with open(file_prefix + 'edges.tsv', 'r') as file:
+        Lines = file.readlines()
+
+        # Strips the newline character
+        for line in Lines:
+            if "node1" not in line:
+                i, j = line.replace('\t',',').strip().split(',')
+                edges.append((i,j))
+    return nodes, {0: edges}

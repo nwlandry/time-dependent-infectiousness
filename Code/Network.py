@@ -27,9 +27,11 @@ class Network:
         print('Running a ' + self.netType+ ' network with the ' + self.contagionModel + ' contagion model.')
         N = len(self.node_list)
 
-        times = list(np.arange(tmin, tmax + 1))
+        times = []
         if len(self.edge_list) > 1: #case where we are doing dynamics on a dynamic network
             times = list(self.edge_list.keys())
+        else:
+            times = list(np.arange(tmin, tmax + 1))
 
         if initial_infected is None:
             #index_1 = random.randrange(N)
