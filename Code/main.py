@@ -15,28 +15,16 @@ nu = 100
 epsilon = 1e-3
 def Gamma(x):
     return math.gamma(x)
-# nodes, edges = readInSFHH()
-# print(getAvgDegree( nodes, edges ) )
-# times = list(edges.keys())
 
-# temporal networks
-    # Activity model
-    # SocioPatterns dataset
-    # Make sure the time step matches and that the average connectivity matches
-    # plot infection curves for each w/ SIR, SEIR, infectious rate function
-
-# static networks to do
-    # Configuration model G = nx.configuration_model(sequence)
-    # Uniform degree distribution Price_model(c, r, n, usePA = False)
-    # Power-law degree distribution Price_model(c, r, n, usePA = True)
-    # A larger empirical network from the ICON database perhaps?
-    # Match the mean degrees
-    # plot infection curves for each w/ SIR, SEIR, infectious rate function
 temp_inf = None
 static_inf = None
 times = None
+nodes1, edges = readInSFHH()
+if times is None:
+    times = list(edges.keys())
+
 for contagionModel in ['SIR', 'SEIR', 'VL']:
-    for time_type in ['temporal', 'static']:
+    for time_type in ['static']:
         if time_type == 'static':
             nodes, edges = readInCO90()
 
@@ -93,25 +81,28 @@ for contagionModel in ['SIR', 'SEIR', 'VL']:
             pickle.dump( network0.node_list, open( exp_name + "node_list.p", "wb" ) )
 
         else:
-            nodes, edges = readInSFHH()
+            nodes1, edges = readInSFHH()
             if times is None:
                 times = list(edges.keys())
 
             if temp_inf is None:
-                temp_inf = np.random.choice(list(nodes))
+                temp_inf = np.random.choice(list(nodes1))
 
             exp_name = 'out/SFHH_'+ contagionModel
-            network = Network(nodes, edges, contagionType = contagionModel)
+            print(exp_name)
+            print(nodes1)
+            network = Network(nodes1, edges, contagionType = contagionModel)
             network.run_temporal_contagion(0, 0, Gamma, exp_name = exp_name, initial_infected = temp_inf)
             pickle.dump( network.edge_list, open( exp_name + "edge_list.p", "wb" ) )
             pickle.dump( network.node_list, open( exp_name + "node_list.p", "wb" ) )
 
             #activity model
-            activities = generate_activities(nodes, exponent, nu, epsilon)
-            nodes, edges = construct_activity_driven_model(nodes, m, activities, times)
+            activities = generate_activities(nodes1, exponent, nu, epsilon)
+            nodes, edges = construct_activity_driven_model(nodes1, m, activities, times)
 
             exp_name = 'out/activity_'+ contagionModel
-            network = Network(nodes, edges, contagionType = contagionModel)
+            print(exp_name)
+            network = Network(nodes1, edges, contagionType = contagionModel)
             network.run_temporal_contagion(0, 0, Gamma, exp_name = exp_name, initial_infected = temp_inf)
             pickle.dump( network.edge_list, open( exp_name + "edge_list.p", "wb" ) )
             pickle.dump( network.node_list, open( exp_name + "node_list.p", "wb" ) )

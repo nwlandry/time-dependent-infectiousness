@@ -105,8 +105,10 @@ class Network:
                 if self.contagionModel == 'VL':
                     # -> calculate viral viral_load at time t (t - 'infected_time')
                     ##print(infected_node, self.node_list.keys())
-                    vl_time = int(ts - times.index(self.node_list[infected_node]['infect_time']))
-                    prob_of_infection = rate_func(vl_time)*(1/(24*180))
+                    vl_time = t - times.index(self.node_list[infected_node]['infect_time'])
+                    # print(vl_time, ts, times.index(self.node_list[infected_node]['infect_time']), t)
+                    if vl_time > 0:
+                        prob_of_infection = rate_func(vl_time)*(1/(24*180))
 
                     #print( '\t Node ' + str(infected_node) + ' is infected (probability of spread: ' + str(prob_of_infection) + '; viral load: ' + str(vl_current)+ ') and has ' + str(len(sus_neighbors)) + ' susecptible neighbors.')
                 else:
