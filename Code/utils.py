@@ -388,9 +388,9 @@ def prob_with_edge_duration(vl_prob, duration):
     #need to come up with how to increase the probability based off of how long duration is
     return 0.0
 
-def generate_activities(n, exponent, nu, epsilon):
+def generate_activities(nodes, exponent, nu, epsilon):
     activities = list()
-    for index in range(n):
+    for n in nodes:
         u = random.uniform(0, 1)
         activities.append(nu*invCDFPowerLaw(u, epsilon, 1, exponent))
     return sorted(activities)
@@ -398,21 +398,19 @@ def generate_activities(n, exponent, nu, epsilon):
 def invCDFPowerLaw(u, a, b, exponent):
     return (a**(1-exponent) + u*(b**(1-exponent) - a**(1-exponent)))**(1/(1-exponent))
 
-def construct_activity_driven_model(n, m, activities, tmin=0, tmax=100, dt=1):
+def construct_activity_driven_model(nodes, m, activities, times):
     # at each time step turn on a node w.p. a_i *deltaT
-    t = tmin
     temporalEdgeList = dict()
-    nodes = set([])
-    while t < tmax:
+    # nodes = set([])
+    for t in times:
         edge_list = list()
-        for index in range(n):
-            nodes.add(index)
-            if random.random() <= activities[index]*dt:
-                indices = random.sample(range(n), m)
+        for index in range(len(nodes)):
+
+            if random.random() <= activities[index]*(1/(24*180)):
+                indices = random.sample(nodes, m)
                 edge_list.extend([(index, j) for j in indices])
                 edge_list.extend([(j, index) for j in indices])
         temporalEdgeList[t] = edge_list
-        t += dt
     return nodes, temporalEdgeList
 
 def construct_neighbor_exchange_model(initialA, tmin=0, tmax=100, dt=1):
