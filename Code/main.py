@@ -7,20 +7,112 @@ import webweb
 from Network import *
 from utils import * # TODO this is where the network builing functions will live
 os.system('clear')
-nodes, edges = readInCO90()
-print(getAvgDegree( nodes, edges ) )
-# timesteps = 'hour' # minute, day
-#
-# #viral_load(timesteps)
-#
-# # filename = "Data/School/thiers_2011.csv"
-# # filename = "Data/School/thiers_2012.csv"
-# # #filename = "Data/Workplace/tij_InVS.dat"
-# # filename = "Data/School/primaryschool.csv"
-# # filename = "Data/School/High-School_data_2013.csv" # 20 secs. -> convert to minutes
-# # delimiter = " "
-# #
-# #nodesA, temporalA = import_temporal_networks(filename, delimiter)
+c=4
+r=1
+
+def Gamma(x):
+    return math.gamma(x)
+# nodes, edges = readInSFHH()
+# print(getAvgDegree( nodes, edges ) )
+# times = list(edges.keys())
+
+# temporal networks
+    # Activity model
+    # SocioPatterns dataset
+    # Make sure the time step matches and that the average connectivity matches
+    # plot infection curves for each w/ SIR, SEIR, infectious rate function
+
+# static networks to do
+    # Configuration model G = nx.configuration_model(sequence)
+    # Uniform degree distribution Price_model(c, r, n, usePA = False)
+    # Power-law degree distribution Price_model(c, r, n, usePA = True)
+    # A larger empirical network from the ICON database perhaps?
+    # Match the mean degrees
+    # plot infection curves for each w/ SIR, SEIR, infectious rate function
+temp_inf = None
+static_inf = None
+times = None
+for contagionModel in ['SIR', 'SEIR', 'VL']:
+    for time_type in ['temporal', 'static']:
+        if time_type == 'static':
+            nodes, edges = readInCO90()
+            avgDeg, degrees = getAvgDegree( nodes, edges )
+            if static_inf is None:
+                static_inf = np.random.choice(list(nodes))
+
+            exp_name = 'out/CO90_'+ contagionModel
+            edges_dict = {}
+            for t in times:
+                edges_dict[t] = edges
+            network = Network(nodes, edges_dict, contagionType = contagionModel)
+            network.run_temporal_contagion(0, 0, Gamma, exp_name = exp_name, initial_infected = initial_infected)
+            pickle.dump( network.edge_list, open( exp_name + "edge_list.p", "wb" ) )
+            pickle.dump( network.node_list, open( exp_name + "node_list.p", "wb" ) )
+            #uniform
+            edges = Price_model(c, r, np.max(list(nodes)), usePA = False)
+            exp_name = 'out/uniform_'+ contagionModel
+            edges_dict = {}
+            for t in times:
+                edges_dict[t] = edges
+            network = Network(nodes, edges_dict, contagionType = contagionModel)
+            network.run_temporal_contagion(0, 0, Gamma, exp_name = exp_name, initial_infected = initial_infected)
+            pickle.dump( network.edge_list, open( exp_name + "edge_list.p", "wb" ) )
+            pickle.dump( network.node_list, open( exp_name + "node_list.p", "wb" ) )
+
+            # power law
+            edges = Price_model(c, r, np.max(list(nodes)), usePA = True)
+            exp_name = 'out/powlaw_'+ contagionModel
+            edges_dict = {}
+            for t in times:
+                edges_dict[t] = edges
+            network = Network(nodes, edges_dict, contagionType = contagionModel)
+            network.run_temporal_contagion(0, 0, Gamma, exp_name = exp_name, initial_infected = initial_infected)
+            pickle.dump( network.edge_list, open( exp_name + "edge_list.p", "wb" ) )
+            pickle.dump( network.node_list, open( exp_name + "node_list.p", "wb" ) )
+
+            #configuration
+            G = nx.configuration_model(degrees)
+            nodes = G.nodes()
+            edges = G.edges()
+            exp_name = 'out/config_'+ contagionModel
+            edges_dict = {}
+            for t in times:
+                edges_dict[t] = edges
+            network = Network(nodes, edges_dict, contagionType = contagionModel)
+            network0.run_temporal_contagion(0, 0, Gamma, exp_name = exp_name, initial_infected = initial_infected)
+            pickle.dump( network0.edge_list, open( exp_name + "edge_list.p", "wb" ) )
+            pickle.dump( network0.node_list, open( exp_name + "node_list.p", "wb" ) )
+
+        else:
+            nodes, edges = readInSFHH()
+            if times is None:
+                times = list(edges.keys())
+
+            if temp_inf is None:
+                temp_inf = np.random.choice(list(nodes))
+
+            exp_name = 'out/SFHH_'+ contagionModel
+            network = Network(nodes, edges, contagionType = contagionModel)
+            network.run_temporal_contagion(0, 0, Gamma, exp_name = exp_name, initial_infected = initial_infected)
+            pickle.dump( network.edge_list, open( exp_name + "edge_list.p", "wb" ) )
+            pickle.dump( network.node_list, open( exp_name + "node_list.p", "wb" ) )
+
+            #activity model
+            activities = generate_activities(n, exponent, nu, epsilon)
+            nodes, edges = construct_activity_driven_model(n, m, activities, tmin=0, tmax=tmax, dt=1)
+
+            exp_name = 'out/activity_'+ contagionModel
+            network = Network(nodes, edges, contagionType = contagionModel)
+            network.run_temporal_contagion(0, 0, Gamma, exp_name = exp_name, initial_infected = initial_infected)
+            pickle.dump( network.edge_list, open( exp_name + "edge_list.p", "wb" ) )
+            pickle.dump( network.node_list, open( exp_name + "node_list.p", "wb" ) )
+
+
+
+# -------------------------------------------------------------------------------------------------
+# OLD FOR REFERENCE
+# -------------------------------------------------------------------------------------------------
+
 # n = 100
 # p = 0.15
 # m = 2
@@ -78,19 +170,3 @@ print(getAvgDegree( nodes, edges ) )
 #     # pickle things to plot later
 #     pickle.dump( network.edge_list, open( "output/" + exp_name + "edge_list.p", "wb" ) )
 #     pickle.dump( network.node_list, open( "output/" + exp_name + "node_list.p", "wb" ) )
-
-#
-'''web = webweb.Web(title="test")
-
-i = 0
-for time, A in temporalA.items():
-    i += 1
-    if i == 100:
-        i = 0
-        web.networks.__dict__[str(time)] = webweb.webweb.Network(adjacency=A)
-
-web.display.sizeBy = 'strength'
-web.display.showLegend = True
-web.display.colorPalette = 'Dark2'
-web.display.colorBy = 'degree'
-web.show()'''

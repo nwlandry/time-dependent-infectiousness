@@ -482,22 +482,26 @@ def get_neighbors(edge_list, node_list, node):
 
 def getAvgDegree(node_list, edge_list):
     avgDeg_ts = []
-
+    allDeg = []
     for t in edge_list.keys():
         G = nx.Graph()
         G.add_nodes_from(node_list)
         G.add_edges_from(edge_list[t])
         degrees = G.degree(node_list)
+
         totalDeg = 0
         for d_n_pair in degrees:
             totalDeg = totalDeg + d_n_pair[1]
+            allDeg.append(d_n_pair[1])
         avgDeg_ts.append(totalDeg / len(node_list))
-    return np.sum(avgDeg_ts)/len(avgDeg_ts)
+    return np.sum(avgDeg_ts)/len(avgDeg_ts), allDeg
 
 def readInSFHH():
     file_prefix = 'datasets/SFHH/'
     nodes = set([])
     edges = {}
+    temp = {}
+
     time = [] # seconds, [t-20, t]
     with open(file_prefix + 'tij_SFHH.dat_', 'r') as file:
         Lines = file.readlines()
@@ -505,14 +509,16 @@ def readInSFHH():
         # Strips the newline character
         for line in Lines:
             time, i, j = line.replace(' ',',').strip().split(',')
-            print(time, i, j)
-            nodes.add(i)
-            nodes.add(j)
+            nodes.add(int(i))
+            nodes.add(int(j))
 
-            if time in edges.keys():
-                edges[time].append((i,j))
+            if int(time) in temp.keys():
+                temp[int(time)].append((i,j))
             else:
-                edges[time] = [(i,j)]
+                temp[int(time)] = [(i,j)]
+    for key, value in temp.items():
+        norm_time = key - np.min(list(temp.keys()))
+        edges[norm_time/(3600*24)] = value
 
     return nodes, edges
 
@@ -528,7 +534,7 @@ def readInCO90():
         for line in Lines:
             if "id" not in line:
                 i = line.replace('\t',',').strip().split(',')[0]
-                nodes.add(i)
+                nodes.add(int(i))
 
     with open(file_prefix + 'edges.tsv', 'r') as file:
         Lines = file.readlines()
@@ -537,5 +543,38 @@ def readInCO90():
         for line in Lines:
             if "node1" not in line:
                 i, j = line.replace('\t',',').strip().split(',')
-                edges.append((i,j))
-    return nodes, {0: edges}
+                edges.append((int(i),int(j)))
+    return nodes, edges
+
+def Price_model(c, r, n, usePA = True):
+    p = c/(c + r)
+    edges = []
+    # develop a seed graph
+    G = np.zeros((c*n))
+    seed = []
+    for node1 in range(1, c + 2):
+        for node2 in range(1, c + 2):
+            if node1 != node2:
+                seed.append(node2)
+    #G[:12] = [2, 3, 4, 1, 3, 4, 1, 2, 4, 2, 3, 1]
+    G[:len(seed)] = seed
+    print(G[:50])
+    G = [int(x) for x in G]
+
+    for node in range(c+1, int(n)):
+        #print(node)
+        for e_out in range(0, c):
+            d = 0
+            if usePA == True and (random.random() < p): # -> preferential attachment
+
+                index = random.randint(0,c*(node-1))
+                #print(len(G), x)
+                d = G[index]
+            else: # use uniform attachment
+                #print(node -1, 1)
+                d = random.randint(0,node-1)
+            G[c*(node-1) + e_out] = d
+            edges.append((node, d))
+    #make actual edges
+
+    return edges
