@@ -4,10 +4,20 @@ import math
 from scipy.integrate import solve_ivp
 from numpy.linalg import inv
 from scipy.special import comb
+import random
 
-def betaVL(t, threshold, maxRate, timeToMaxRate):
-    rate = math.e/timeToMaxRate*np.multiply(t, np.exp(-t/timeToMaxRate))
+def betaVL(tau, threshold, maxRate, timeToMaxRate, alpha=1):
+    rate = math.e/timeToMaxRate*np.multiply(np.power(tau, alpha), np.exp(-tau/timeToMaxRate))
     rate[np.where(rate < threshold)] = 0
+    return maxRate*rate
+
+def beta(tau, threshold, maxRate, timeToMaxRate, alpha=1):
+    rate = math.e/timeToMaxRate*np.multiply(np.power(tau, alpha), np.exp(-tau/timeToMaxRate))
+    try:
+        rate[np.where(rate < threshold)] = 0
+    except:
+        if rate < threshold:
+            return 0
     return maxRate*rate
 
 def betaConstant(t, rate):
@@ -91,9 +101,8 @@ def calculateCriticalMax(nInfectiousStates, tStates, threshold, dt, tolerance=0.
         iterations += 1
     return pMin
 
-
 def generatePowerLawDegreeSequence(n, minDegree, maxDegree, exponent):
-    return np.round(invCDFPowerLaw(np.random.rand(n), minDegree, maxDegree, exponent))
+    return np.round(invCDFPowerLaw(np.random.rand(n), minDegree, maxDegree, exponent)).astype(int)
 
 def invCDFPowerLaw(u, minDegree, maxDegree, exponent):
     return (minDegree**(1-exponent) + u*(maxDegree**(1-exponent) - minDegree**(1-exponent)))**(1/(1-exponent))
@@ -101,17 +110,4 @@ def invCDFPowerLaw(u, minDegree, maxDegree, exponent):
 def generateConfigurationModelP(degreeSequence):
     k, counts = np.unique(degreeSequence, return_counts=True) # get unique k values
     p = counts/len(degreeSequence)
-    meanDegree = np.mean(degreeSequence)
-    return np.outer(k,np.multiply(k, p))/(meanDegree*len(degreeSequence))
-
-def binomialCCDF(n, p, threshold):
-    if n < threshold:
-        return 0
-    ccdf = 0
-    for value in range(threshold, n + 1):
-        ccdf += binomial(n, p, value)
-    return ccdf
-
-
-def binomial(n, p, value):
-    return comb(n, value, exact=True)*p**value*(1-p)**(n - value)
+    return np.outer(k, np.multiply(k, p))/(np.sum(degreeSequence))

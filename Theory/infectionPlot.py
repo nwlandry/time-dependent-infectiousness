@@ -17,15 +17,17 @@ timeToMaxRate = 4
 n = 10000
 b0 = 3
 
-tStates = np.linspace(0.0, lengthOfInfectiousness, nInfectiousStates)
-dt = tStates[1] - tStates[0]
+dtOutput = 5
 
-b = betaVL(tStates, threshold, maxRate, timeToMaxRate)
+tauStates = np.linspace(0.0, lengthOfInfectiousness, nInfectiousStates)
+dtau = tauStates[1] - tauStates[0]
+
+b = betaVL(tauStates, threshold, maxRate, timeToMaxRate)
 
 
-bScaled = b/(np.sum(b)*dt)
+bScaled = b/(np.sum(b)*dtau)
 b = b0*bScaled
-bConst = betaConstant(tStates, np.mean(b))
+bConst = betaConstant(tauStates, np.mean(b))
 beta = np.mean(b)
 gamma = 1/lengthOfInfectiousness
 
@@ -39,26 +41,22 @@ initialStatesVL[0] = 1 - initialFractionInfected
 
 initialStatesSIR = [1 - initialFractionInfected, initialFractionInfected, 0]
 
-sol1 = solve_ivp(viralLoadModelFullyMixed, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(b, dt))
+sol1 = solve_ivp(viralLoadModelFullyMixed, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, dtOutput), args=(b, dtau))
 t1 = sol1.t
 y1 = sol1.y.T
 
-sol2 = solve_ivp(viralLoadModelFullyMixed, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(bConst, dt))
+sol2 = solve_ivp(viralLoadModelFullyMixed, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, dtOutput), args=(bConst, dtau))
 t2 = sol2.t
 y2 = sol2.y.T
 
-sol3 = solve_ivp(SIRModelFullyMixed, (0, tmax), initialStatesSIR, t_eval=np.arange(0, tmax, 0.1), args=(beta, gamma))
+sol3 = solve_ivp(SIRModelFullyMixed, (0, tmax), initialStatesSIR, t_eval=np.arange(0, tmax, dtOutput), args=(beta, gamma))
 t3 = sol3.t
 y3 = sol3.y.T
 
-reds = cm.get_cmap("Reds")
-blues = cm.get_cmap("Blues")
-greens = cm.get_cmap("Greens")
-
 plt.figure(figsize=(8,6))
-plt.plot(t1, np.sum(y1[:,1:-1], axis=1), linewidth=2, color=reds(0.4))
-plt.plot(t2, np.sum(y2[:,1:-1], axis=1), color=greens(0.4))
-plt.plot(t3, y3[:,-2], linewidth=2, color=blues(0.4))
+plt.plot(t1, np.sum(y1[:,1:-1], axis=1), 'ks-', linewidth=2)
+plt.plot(t2, np.sum(y2[:,1:-1], axis=1), 'ks--', linewidth=2)
+plt.plot(t3, y3[:,-2], 'ks-.', linewidth=2)
 plt.ylim([0, 1])
 
 # Uniform degree distribution
@@ -67,9 +65,9 @@ P = generateConfigurationModelP(degrees)
 k = len(P)
 
 spectralRadius = np.max(np.abs(np.linalg.eigvals(P)))
-bScaled = b/(spectralRadius*np.sum(b)*dt)
+bScaled = b/(spectralRadius*np.sum(b)*dtau)
 b = k*b0*bScaled
-bConst = betaConstant(tStates, np.mean(b))
+bConst = betaConstant(tauStates, np.mean(b))
 beta = np.mean(b)
 gamma = 1/lengthOfInfectiousness
 
@@ -83,33 +81,33 @@ initialStatesSIR = np.zeros(3*k)
 initialStatesSIR[k:2*k] = initialFractionInfected*initialInfected/np.sum(initialInfected)
 initialStatesSIR[:k] = (1 - initialFractionInfected)*initialSusceptible/np.sum(initialSusceptible)
 
-sol1 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(P, b, dt))
+sol1 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, dtOutput), args=(P, b, dtau))
 t1 = sol1.t
 y1 = sol1.y.T
 
-sol2 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(P, bConst, dt))
+sol2 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, dtOutput), args=(P, bConst, dtau))
 t2 = sol2.t
 y2 = sol2.y.T
 #
-sol3 = solve_ivp(SIRModelDegreeBased, (0, tmax), initialStatesSIR, t_eval=np.arange(0, tmax, 0.1), args=(P, beta, gamma))
+sol3 = solve_ivp(SIRModelDegreeBased, (0, tmax), initialStatesSIR, t_eval=np.arange(0, tmax, dtOutput), args=(P, beta, gamma))
 t3 = sol3.t
 y3 = sol3.y.T
 
-plt.plot(t1, np.sum(y1[:,k:-k], axis=1), label=r"$\beta(t)\propto t e^{-t/4}$, (VL Model)", linewidth=2, color=reds(0.6))
-plt.plot(t2, np.sum(y2[:,k:-k], axis=1), label=r"$\beta(t)=c$, (VL Model)", linewidth=2, color=greens(0.6))
-plt.plot(t3, np.sum(y3[:,k:2*k], axis=1), label="SIR Model", linewidth=2, color=blues(0.6))
+plt.plot(t1, np.sum(y1[:,k:-k], axis=1), 'ko-', linewidth=2)
+plt.plot(t2, np.sum(y2[:,k:-k], axis=1), 'ko--', linewidth=2)
+plt.plot(t3, np.sum(y3[:,k:2*k], axis=1), 'ko-.', linewidth=2)
 plt.ylabel("Total fraction infected", fontsize=16)
 plt.ylim([0, 1])
 
 ### Power Law degree distribution
-degrees = generatePowerLawDegreeSequence(n, 10, 100, 3)
+degrees = generatePowerLawDegreeSequence(n, 10, 1000, 3)
 P = generateConfigurationModelP(degrees)
 k = len(P)
 
 spectralRadius = np.max(np.abs(np.linalg.eigvals(P)))
-bScaled = b/(spectralRadius*np.sum(b)*dt)
+bScaled = b/(spectralRadius*np.sum(b)*dtau)
 b = k*b0*bScaled
-bConst = betaConstant(tStates, np.mean(b))
+bConst = betaConstant(tauStates, np.mean(b))
 beta = np.mean(b)
 gamma = 1/lengthOfInfectiousness
 
@@ -123,26 +121,24 @@ initialStatesSIR = np.zeros(3*k)
 initialStatesSIR[k:2*k] = initialFractionInfected*initialInfected/np.sum(initialInfected)
 initialStatesSIR[:k] = (1 - initialFractionInfected)*initialSusceptible/np.sum(initialSusceptible)
 
-sol1 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(P, b, dt))
+sol1 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, dtOutput), args=(P, b, dtau))
 t1 = sol1.t
 y1 = sol1.y.T
 
-sol2 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(P, bConst, dt))
+sol2 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, dtOutput), args=(P, bConst, dtau))
 t2 = sol2.t
 y2 = sol2.y.T
 #
-sol3 = solve_ivp(SIRModelDegreeBased, (0, tmax), initialStatesSIR, t_eval=np.arange(0, tmax, 0.1), args=(P, beta, gamma))
+sol3 = solve_ivp(SIRModelDegreeBased, (0, tmax), initialStatesSIR, t_eval=np.arange(0, tmax, dtOutput), args=(P, beta, gamma))
 t3 = sol3.t
 y3 = sol3.y.T
 
-plt.plot(t1, np.sum(y1[:,k:-k], axis=1), linewidth=2, color=reds(0.8))
-plt.plot(t2, np.sum(y2[:,k:-k], axis=1), linewidth=2, color=greens(0.8))
-plt.plot(t3, np.sum(y3[:,k:2*k], axis=1), linewidth=2, color=blues(0.8))
+plt.plot(t1, np.sum(y1[:,k:-k], axis=1), 'k^-', linewidth=2)
+plt.plot(t2, np.sum(y2[:,k:-k], axis=1), 'k^--', linewidth=2)
+plt.plot(t3, np.sum(y3[:,k:2*k], axis=1), 'k^-.', linewidth=2)
 plt.xlabel("time (days)", fontsize=16)
 plt.ylim([0, 1])
-plt.text(1, 0.8, "Light: Fully-mixed\nMedium: Uniform degree distribution\nDark: Power-law degree distribution", fontsize=12)
-plt.legend(loc="upper right")
 plt.tight_layout()
-plt.savefig("infection_curves.png", dpi=600)
-plt.savefig("infection_curves.pdf")
+plt.savefig("Figures/infection_curves.png", dpi=600)
+plt.savefig("Figures/infection_curves.pdf")
 plt.show()

@@ -8,18 +8,18 @@ from matplotlib import cm
 from numpy.linalg import inv
 from utilities import *
 
-nInfectiousStates = 15
-lengthOfInfectiousness = 14
+nInfectiousStates = 100
+lengthOfInfectiousness = 21
 nStates = nInfectiousStates + 2
-threshold = 0.0
-maxRate = 100
+threshold = 0.2
+maxRate = 1
 timeToMaxRate = 4
 
-tStates = np.linspace(0.0, lengthOfInfectiousness, nInfectiousStates)
-dt = tStates[1] - tStates[0]
+tauStates = np.linspace(0.0, lengthOfInfectiousness, nInfectiousStates)
+dtau = tauStates[1] - tauStates[0]
 
-b = betaVL(tStates, threshold, maxRate, timeToMaxRate)
-bConst = betaConstant(tStates, np.mean(b))
+b = betaVL(tauStates, threshold, maxRate, timeToMaxRate)
+bConst = betaConstant(tauStates, np.mean(b))
 beta = np.mean(b)
 gamma = 1/lengthOfInfectiousness
 tmax = 50
@@ -40,11 +40,11 @@ initialStatesSIR = np.zeros(3*k)
 initialStatesSIR[k:2*k] = initialFractionInfected*initialInfected/np.sum(initialInfected)
 initialStatesSIR[:k] = (1 - initialFractionInfected)*initialSusceptible/np.sum(initialSusceptible)
 
-sol1 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(P, b, dt))
+sol1 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(P, b, dtau))
 t1 = sol1.t
 y1 = sol1.y.T
 
-sol2 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(P, bConst, dt))
+sol2 = solve_ivp(viralLoadModelDegreeBased, (0, tmax), initialStatesVL, t_eval=np.arange(0, tmax, 0.1), args=(P, bConst, dtau))
 t2 = sol2.t
 y2 = sol2.y.T
 #
@@ -68,8 +68,7 @@ plt.plot(t1, y1[:,k:-k].dot(repmat(b, 1, k).T), label=r"$\beta(t)\propto\frac{e}
 plt.plot(t2, y2[:,k:-k].dot(repmat(bConst, 1, k).T), label=r"$\beta(t)=c$, (VL Model)")
 plt.plot(t3, beta*np.sum(y3[:,k:2*k], axis=1), label="SIR Model")
 plt.xlabel("time (days)", fontsize=14)
-plt.ylabel("Infection rate (summed over all stages)", fontsize=14)
-plt.ylim([0, 7])
+plt.ylabel("Total infection rate (summed over all stages)", fontsize=14)
 plt.legend()
 plt.tight_layout()
 plt.show()

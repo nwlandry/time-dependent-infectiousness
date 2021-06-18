@@ -9,16 +9,16 @@ from numpy.linalg import inv
 import utilities
 
 nInfectiousStates = 100
-lengthOfInfectiousness = 21
+lengthOfInfectiousness = 15
 nStates = nInfectiousStates + 2
 threshold = 0.2
 maxRate = 1
-timeToMaxRate = 4
+timeToMaxRate = 5.2
 
 tStates = np.linspace(0.0, lengthOfInfectiousness, nInfectiousStates)
 dt = tStates[1] - tStates[0]
 
-b = utilities.betaVL(tStates, threshold, maxRate, timeToMaxRate)
+b = utilities.betaVL(tStates, threshold, maxRate, timeToMaxRate, alpha=10.0)
 
 # plt.figure()
 # plt.subplot(121)

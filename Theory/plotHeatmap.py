@@ -17,36 +17,24 @@ threshold = 0.2
 maxRate = 1
 timeToMaxRate = 4
 
-tStates = np.linspace(0.0, lengthOfInfectiousness, nInfectiousStates)
-dt = tStates[1] - tStates[0]
+tauStates = np.linspace(0.0, lengthOfInfectiousness, nInfectiousStates)
+dtau = tauStates[1] - tauStates[0]
 
-b = betaVL(tStates, threshold, maxRate, timeToMaxRate)
-bConst = betaConstant(tStates, np.mean(b))
+b = betaVL(tauStates, threshold, maxRate, timeToMaxRate)
+bConst = betaConstant(tauStates, np.mean(b))
 
 N = 1000
 initialStates = np.zeros(nStates)
 initialStates[1] = 1/N
 initialStates[0] = 1 - np.sum(initialStates[1:])/N
 
-sol1 = solve_ivp(viralLoadModelFullyMixed, (0, tmax), initialStates, t_eval=np.arange(0, tmax, 0.1), args=(b, dt))
+sol1 = solve_ivp(viralLoadModelFullyMixed, (0, tmax), initialStates, t_eval=np.arange(0, tmax, 0.1), args=(b, dtau))
 t1 = sol1.t
 y1 = sol1.y.T
 
-sol2 = solve_ivp(viralLoadModelFullyMixed, (0, tmax), initialStates, t_eval=np.arange(0, tmax, 0.1), args=(bConst, dt))
+sol2 = solve_ivp(viralLoadModelFullyMixed, (0, tmax), initialStates, t_eval=np.arange(0, tmax, 0.1), args=(bConst, dtau))
 t2 = sol2.t
 y2 = sol2.y.T
-#
-# plt.figure()
-# plt.subplot(121)
-# plt.title(r"$\beta(t)$ and infectious threshold")
-# plt.plot(tStates, betaVL(tStates, 0, 1.0), linewidth=2)
-# plt.plot([np.min(tStates), np.max(tStates)], [0.3, 0.3], 'k--', linewidth=2)
-# plt.xlabel("Time (days)", fontsize=14)
-# plt.ylabel("Probability of transmission", fontsize=14)
-# plt.subplot(122)
-# plt.title(r"$\beta(t)I_{\beta(t)\geq threshold}$")
-# plt.plot(tStates, betaVL(tStates, 0.3, 1.0), linewidth=2)
-# plt.show()
 
 plt.figure()
 plt.plot([0, tmax], [0, 0], 'k--')
@@ -61,7 +49,7 @@ plt.show()
 
 plt.figure()
 plt.subplot(311)
-plt.title(r"$\beta(\tau)=\frac{e}{4} \tau e^{-\tau/4}$", fontsize=14)
+plt.title(r"$\beta(\tau)\propto\tau e^{-\tau/4}$", fontsize=14)
 plt.imshow(np.flipud(y1[:,1:-1].T), cmap=cm.coolwarm, aspect="auto", interpolation="spline16", extent=(0, tmax, 0, nStates), vmin=0, vmax=0.15)
 plt.colorbar()
 
