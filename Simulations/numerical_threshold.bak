@@ -1,0 +1,7 @@
+'R0', (0, 556)
+'extent-SIR-static', (1024, 556)
+'extent-VL-const-static', (2048, 556)
+'extent-VL-gamma-static', (3072, 556)
+'extent-SIR-temporal', (4096, 556)
+'extent-VL-const-temporal', (5120, 556)
+'extent-VL-gamma-temporal', (6144, 556)

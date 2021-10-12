@@ -1,0 +1,7 @@
+'num-states', (0, 44)
+'time-SIR', (3584, 450)
+'mag-SIR', (4608, 450)
+'time-VL-const', (5632, 450)
+'mag-VL-const', (6656, 450)
+'time-VL-gamma', (7680, 450)
+'mag-VL-gamma', (8704, 450)

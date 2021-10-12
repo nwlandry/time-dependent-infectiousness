@@ -1,0 +1,5 @@
+'infection-distribution-static', (0, 27374)
+'infection-distribution-temporal', (27648, 27374)
+'tmax', (55296, 5)
+'tauR', (55808, 115)
+'dt', (56320, 5)
